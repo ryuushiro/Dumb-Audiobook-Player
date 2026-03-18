@@ -1,0 +1,27 @@
+# Visual Studio / .NET Core build folders
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Oo]ut/
+[Dd]ebug/
+[Rr]elease/
+
+# Visual Studio cache/options directories
+.vs/
+*.user
+*.userprefs
+*.suo
+
+# Project specific local data
+library.db
+library.db-shm
+library.db-wal
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

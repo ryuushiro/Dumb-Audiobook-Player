@@ -1,0 +1,306 @@
+<Window x:Class="AudiobookPlayer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Audiobook Player" Height="580" Width="880" 
+        Background="#121212" Foreground="White" WindowStartupLocation="CenterScreen" 
+        FontFamily="Segoe UI, Tahoma, sans-serif">
+    
+    <Window.Resources>
+        <!-- Modern Button Style (Green Primary Action) -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1DB954"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="25" Padding="15,10" RenderTransformOrigin="0.5,0.5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1ED760"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1AA34A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Secondary Button Style (Dark Gray) -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="#282828"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="22">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3E3E3E"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#181818"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Accent Colored Slider -->
+        <Style TargetType="Slider">
+            <Setter Property="Foreground" Value="#1DB954"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Dark Rounded ComboBox Toggle Button -->
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
+            <Border x:Name="templateRoot" Background="#333333" BorderThickness="0" CornerRadius="6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="30"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.ColumnSpan="2" Background="Transparent" />
+                    <Path x:Name="arrow" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="White" Data="M0,0 L4,4 L8,0 Z"/>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Background" TargetName="templateRoot" Value="#444444"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="true">
+                    <Setter Property="Background" TargetName="templateRoot" Value="#222222"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- ComboBoxItem Style -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#555555"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1DB954"/> 
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Dark Rounded ComboBox Style -->
+        <Style x:Key="DarkRoundedComboBox" TargetType="{x:Type ComboBox}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton x:Name="toggleButton" BorderThickness="0" Background="{TemplateBinding Background}" 
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                          Template="{StaticResource ComboBoxToggleButton}"/>
+                            <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" 
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding SelectionBoxItem}" 
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                              ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
+                                              IsHitTestVisible="False"/>
+                            <Popup x:Name="PART_Popup" AllowsTransparency="true" IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}" 
+                                   Placement="Bottom" PopupAnimation="Slide">
+                                <Border x:Name="dropDownBorder" Background="#333333" BorderThickness="0" CornerRadius="6" Margin="0,5,0,0"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{Binding ActualWidth, ElementName=toggleButton}">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.5" Color="Black"/>
+                                    </Border.Effect>
+                                    <ScrollViewer x:Name="DropDownScrollViewer">
+                                        <Border CornerRadius="6" ClipToBounds="True">
+                                            <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </Border>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
+    <!-- Main Content Container Grid -->
+    <Grid Margin="35">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="340"/> <!-- Room for the cover art -->
+            <ColumnDefinition Width="*"/>   <!-- Right side metadata and controls -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Column: Premium Cover Art Presentation & Utilities -->
+        <StackPanel Grid.Column="0" Margin="0,0,40,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+            
+            <!-- Book Cover -->
+            <Grid>
+                <Grid.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="30" ShadowDepth="12" Opacity="0.5"/>
+                </Grid.Effect>
+                <Rectangle RadiusX="12" RadiusY="12" Fill="#1E1E1E" Width="280" Height="280"/>
+                <Image x:Name="CoverImage" Stretch="Uniform" Width="280" Height="280">
+                    <Image.OpacityMask>
+                        <VisualBrush>
+                            <VisualBrush.Visual>
+                                <Rectangle RadiusX="12" RadiusY="12" Width="280" Height="280" Fill="White" />
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Image.OpacityMask>
+                </Image>
+            </Grid>
+
+            <!-- Sleep Timer under Cover Art -->
+            <ComboBox x:Name="SleepTimerComboBox" Width="280" Height="40" Margin="0,20,0,0" 
+                      SelectionChanged="SleepTimerComboBox_SelectionChanged" 
+                      VerticalContentAlignment="Center" HorizontalContentAlignment="Center" 
+                      FontSize="14" FontWeight="SemiBold" Cursor="Hand" Style="{StaticResource DarkRoundedComboBox}">
+                <ComboBoxItem Content="Timer: Off" IsSelected="True"/>
+                <ComboBoxItem Content="15 Minutes"/>
+                <ComboBoxItem Content="30 Minutes"/>
+                <ComboBoxItem Content="60 Minutes"/>
+                <ComboBoxItem Content="End of Chapter"/>
+            </ComboBox>
+
+            <!-- YouTube-style Hover Volume -->
+            <StackPanel x:Name="VolumeContainer" Orientation="Horizontal" Background="Transparent" Margin="0,15,0,0" HorizontalAlignment="Center">
+                <TextBlock x:Name="VolumeIcon" Text="🔊" FontSize="20" VerticalAlignment="Center" Margin="0,0,10,0" Cursor="Hand" ToolTip="Volume"/>
+                <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" Value="100" VerticalAlignment="Center" 
+                        ValueChanged="VolumeSlider_ValueChanged" IsSnapToTickEnabled="True" TickFrequency="1">
+                    <Slider.Style>
+                        <Style TargetType="Slider">
+                            <Setter Property="Foreground" Value="#1DB954"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Opacity" Value="0"/>
+                            <Setter Property="Width" Value="0"/>
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMouseOver, ElementName=VolumeContainer}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Setter Property="Width" Value="120"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Slider.Style>
+                </Slider>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Right Column: Details and Controls -->
+        <Grid Grid.Column="1" VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Title -->
+                <RowDefinition Height="Auto"/> <!-- Author -->
+                <RowDefinition Height="Auto"/> <!-- Current Chapter -->
+                <RowDefinition Height="40"/>   <!-- Empty Spacer -->
+                <RowDefinition Height="Auto"/> <!-- Progress UI -->
+                <RowDefinition Height="Auto"/> <!-- Playback Buttons -->
+                <RowDefinition Height="20"/>   <!-- Empty Spacer -->
+                <RowDefinition Height="Auto"/> <!-- Bottom Load/Dropdown -->
+            </Grid.RowDefinitions>
+
+            <!-- Metadata Header -->
+            <TextBlock x:Name="TitleText" Grid.Row="0" Text="No Book Loaded" FontSize="36" FontWeight="Black" TextWrapping="Wrap" Margin="0,0,0,8" Foreground="White" />
+            <TextBlock x:Name="AuthorText" Grid.Row="1" Text="Unknown Author" FontSize="20" Foreground="#B3B3B3" FontWeight="SemiBold" Margin="0,0,0,8" />
+            
+            <!-- Chapter Indicator Badge -->
+            <Border Grid.Row="2" Background="#1DB954" CornerRadius="6" HorizontalAlignment="Left" Padding="12,4" Opacity="0.9">
+                <TextBlock x:Name="CurrentChapterText" Text="Waiting for chapter data..." FontSize="13" Foreground="#FFFFFF" FontWeight="Bold" />
+            </Border>
+
+            <!-- Progress Bar / Slider Area -->
+            <Grid Grid.Row="4" Margin="0,0,0,30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="CurrentTimeText" Grid.Column="0" Text="0:00:00" VerticalAlignment="Center" Margin="0,0,15,0" Foreground="#B3B3B3" FontSize="13" FontWeight="SemiBold" MinWidth="55" TextAlignment="Right"/>
+                <Slider x:Name="ProgressSlider" Grid.Column="1" VerticalAlignment="Center" IsMoveToPointEnabled="True" 
+                        PreviewMouseDown="ProgressSlider_PreviewMouseDown" PreviewMouseUp="ProgressSlider_PreviewMouseUp" />
+                <TextBlock x:Name="TotalTimeText" Grid.Column="2" Text="0:00:00" VerticalAlignment="Center" Margin="15,0,0,0" Foreground="#B3B3B3" FontSize="13" FontWeight="SemiBold" MinWidth="55"/>
+            </Grid>
+
+            <!-- Core Playback Controls -->
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="SkipBackBtn" Content="⏪ 15s" Width="100" Height="45" Margin="8" Click="SkipBackBtn_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                <Button x:Name="PlayPauseBtn" Content="▶ Play" Width="110" Height="55" Margin="8" Click="PlayPauseBtn_Click" Style="{StaticResource PrimaryButtonStyle}" />
+                <Button x:Name="SkipForwardBtn" Content="15s ⏩" Width="100" Height="45" Margin="8" Click="SkipForwardBtn_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                
+                <ComboBox x:Name="SpeedComboBox" Width="80" Height="40" Margin="15,8,0,8" SelectionChanged="SpeedComboBox_SelectionChanged" 
+                          VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                          FontSize="14" FontWeight="Bold" Cursor="Hand" Style="{StaticResource DarkRoundedComboBox}">
+                    <ComboBoxItem Content="1.0x" IsSelected="True"/>
+                    <ComboBoxItem Content="1.25x"/>
+                    <ComboBoxItem Content="1.5x"/>
+                    <ComboBoxItem Content="2.0x"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Utilities relocated to Left Column -->
+
+            <!-- Bottom Tools Overlay -->
+            <Grid Grid.Row="7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Chapter Selector Group -->
+                <Grid Grid.Column="0" Margin="0,0,20,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button x:Name="PrevChapterBtn" Grid.Column="0" Content="&lt;" Width="45" Height="40" Margin="0,0,10,0" 
+                            Click="PrevChapterBtn_Click" Style="{StaticResource SecondaryButtonStyle}" FontSize="18" FontWeight="Bold" />
+                            
+                    <ComboBox x:Name="ChapterComboBox" Grid.Column="1" Height="40" VerticalContentAlignment="Center"
+                              DisplayMemberPath="Name" SelectedValuePath="Index" SelectionChanged="ChapterComboBox_SelectionChanged" 
+                              Cursor="Hand" FontWeight="SemiBold" FontSize="14" Style="{StaticResource DarkRoundedComboBox}" />
+                              
+                    <Button x:Name="NextChapterBtn" Grid.Column="2" Content="&gt;" Width="45" Height="40" Margin="10,0,0,0" 
+                            Click="NextChapterBtn_Click" Style="{StaticResource SecondaryButtonStyle}" FontSize="18" FontWeight="Bold" />
+                </Grid>
+                
+                <!-- Primary File Load Button -->
+                <Button x:Name="LoadBookBtn" Grid.Column="1" Content="📖 Load Audio Book" Width="160" Height="40" 
+                        Click="LoadBookBtn_Click" Style="{StaticResource SecondaryButtonStyle}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
