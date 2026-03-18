@@ -2,7 +2,8 @@
 
 A modern, high-performance audiobook player built with **C#**, **.NET 8**, and **WPF**. This application provides a premium listening experience with deep chapter support, persistent playback memory, and a sleek, Spotify-inspired dark interface.
 
-![Main Interface Placeholder](https://via.placeholder.com/800x450?text=Audiobook+Player+Interface)
+<img width="866" height="573" alt="image" src="https://github.com/user-attachments/assets/4c0ff5e4-118f-4287-8887-189368350b5e" />
+
 
 ## ✨ Key Features
 
@@ -32,7 +33,7 @@ A modern, high-performance audiobook player built with **C#**, **.NET 8**, and *
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YourUsername/AudiobookPlayer.git
+   git clone https://github.com/ryuushiro/Dumb-Audiobook-Player.git
    cd AudiobookPlayer
    ```
 
