@@ -31,8 +31,10 @@ namespace AudiobookPlayer.Services
             var book = new Book
             {
                 FilePath = filePath,
-                // Fallback to filename if Title is missing
-                Title = !string.IsNullOrWhiteSpace(tag.Title) ? tag.Title : Path.GetFileNameWithoutExtension(filePath),
+                // Audiobook name is usually the Album tag. Fallback to the folder name if Album is missing.
+                Title = !string.IsNullOrWhiteSpace(tag.Album) 
+                    ? tag.Album 
+                    : Path.GetFileName(Path.GetDirectoryName(filePath)) ?? Path.GetFileNameWithoutExtension(filePath),
                 // Album artist is usually priority for book authors, followed by performer
                 Author = tag.FirstAlbumArtist ?? tag.FirstPerformer ?? "Unknown Author",
                 TotalDuration = (long)file.Properties.Duration.TotalMilliseconds

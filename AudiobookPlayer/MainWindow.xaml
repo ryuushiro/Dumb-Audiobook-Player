@@ -64,94 +64,6 @@
             <Setter Property="Margin" Value="5,0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
-
-        <!-- Dark Rounded ComboBox Toggle Button -->
-        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
-            <Border x:Name="templateRoot" Background="#333333" BorderThickness="0" CornerRadius="6">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="30"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Grid.ColumnSpan="2" Background="Transparent" />
-                    <Path x:Name="arrow" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="White" Data="M0,0 L4,4 L8,0 Z"/>
-                </Grid>
-            </Border>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Background" TargetName="templateRoot" Value="#444444"/>
-                </Trigger>
-                <Trigger Property="IsChecked" Value="true">
-                    <Setter Property="Background" TargetName="templateRoot" Value="#222222"/>
-                </Trigger>
-            </ControlTemplate.Triggers>
-        </ControlTemplate>
-
-        <!-- ComboBoxItem Style -->
-        <Style TargetType="ComboBoxItem">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#333333"/>
-            <Setter Property="Padding" Value="15,10"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBoxItem">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#555555"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1DB954"/> 
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Dark Rounded ComboBox Style -->
-        <Style x:Key="DarkRoundedComboBox" TargetType="{x:Type ComboBox}">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#333333"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ComboBox}">
-                        <Grid>
-                            <ToggleButton x:Name="toggleButton" BorderThickness="0" Background="{TemplateBinding Background}" 
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
-                                          Template="{StaticResource ComboBoxToggleButton}"/>
-                            <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" 
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding SelectionBoxItem}" 
-                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                              ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
-                                              IsHitTestVisible="False"/>
-                            <Popup x:Name="PART_Popup" AllowsTransparency="true" IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}" 
-                                   Placement="Bottom" PopupAnimation="Slide">
-                                <Border x:Name="dropDownBorder" Background="#333333" BorderThickness="0" CornerRadius="6" Margin="0,5,0,0"
-                                        MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{Binding ActualWidth, ElementName=toggleButton}">
-                                    <Border.Effect>
-                                        <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.5" Color="Black"/>
-                                    </Border.Effect>
-                                    <ScrollViewer x:Name="DropDownScrollViewer">
-                                        <Border CornerRadius="6" ClipToBounds="True">
-                                            <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
-                                        </Border>
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
     
     <!-- Main Content Container Grid -->
@@ -216,6 +128,10 @@
                     </Slider.Style>
                 </Slider>
             </StackPanel>
+
+            <!-- Settings Button -->
+            <Button x:Name="SettingsBtn" Content="⚙️ Settings" Width="280" Height="40" Margin="0,15,0,0" 
+                    Click="SettingsBtn_Click" Style="{StaticResource SecondaryButtonStyle}" FontSize="14"/>
         </StackPanel>
 
         <!-- Right Column: Details and Controls -->
@@ -276,6 +192,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
                 <!-- Chapter Selector Group -->
@@ -297,8 +214,12 @@
                             Click="NextChapterBtn_Click" Style="{StaticResource SecondaryButtonStyle}" FontSize="18" FontWeight="Bold" />
                 </Grid>
                 
-                <!-- Primary File Load Button -->
-                <Button x:Name="LoadBookBtn" Grid.Column="1" Content="📖 Load Audio Book" Width="160" Height="40" 
+                <!-- Library Browser Button -->
+                <Button x:Name="LibraryBtn" Grid.Column="1" Content="📚 Library" Width="120" Height="40" Margin="0,0,10,0"
+                        Click="LibraryBtn_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                        
+                <!-- Single File Load Button -->
+                <Button x:Name="LoadBookBtn" Grid.Column="2" Content="📂 File" Width="80" Height="40" 
                         Click="LoadBookBtn_Click" Style="{StaticResource SecondaryButtonStyle}" />
             </Grid>
         </Grid>

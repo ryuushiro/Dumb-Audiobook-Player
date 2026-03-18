@@ -16,10 +16,17 @@ namespace AudiobookPlayer
         private readonly DatabaseService _dbService;
         private readonly MetadataService _metadataService;
         private readonly AudioEngineService _audioEngine;
+        
+        private AppConfig _appConfig;
 
         private Book? _currentBook;
         private bool _isPlaying = false;
         private bool _isDraggingSlider = false;
+
+        // Playlist Mode State
+        private List<string> _playlist = new List<string>();
+        private int _playlistIndex = 0;
+        private bool _isPlaylistMode = false;
         
         // State for Chapter-relative Progress
         private ChapterInfo? _currentChapter;
@@ -37,6 +44,7 @@ namespace AudiobookPlayer
             _dbService = new DatabaseService();
             _metadataService = new MetadataService();
             _audioEngine = new AudioEngineService();
+            _appConfig = AppConfig.Load();
             
             _sleepTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
             _sleepTimer.Tick += SleepTimer_Tick;
@@ -44,6 +52,14 @@ namespace AudiobookPlayer
             _audioEngine.TimeChanged += AudioEngine_TimeChanged;
             _audioEngine.EndReached += AudioEngine_EndReached;
             _audioEngine.ChapterChanged += AudioEngine_ChapterChanged;
+
+            UpdateSkipButtonLabels();
+        }
+
+        private void UpdateSkipButtonLabels()
+        {
+            SkipBackBtn.Content = $"⏪ {_appConfig.SkipDuration}s";
+            SkipForwardBtn.Content = $"{_appConfig.SkipDuration}s ⏩";
         }
 
         private void LoadBookBtn_Click(object sender, RoutedEventArgs e)
@@ -56,15 +72,41 @@ namespace AudiobookPlayer
 
             if (openFileDialog.ShowDialog() == true)
             {
+                _isPlaylistMode = false;
                 LoadAudiobook(openFileDialog.FileName);
             }
+        }
+
+        private void LibraryBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var libraryWindow = new LibraryWindow();
+                libraryWindow.Owner = this;
+                if (libraryWindow.ShowDialog() == true && libraryWindow.SelectedPlaylist.Count > 0)
+                {
+                    LoadPlaylist(libraryWindow.SelectedPlaylist, 0);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to open library: {ex.Message}", "Error");
+            }
+        }
+
+        private void LoadPlaylist(List<string> playlist, int startIndex)
+        {
+            _playlist = playlist;
+            _playlistIndex = startIndex;
+            _isPlaylistMode = playlist.Count > 1;
+            LoadAudiobook(_playlist[_playlistIndex]);
         }
 
         private async void LoadAudiobook(string filePath)
         {
             try
             {
-                if (_currentBook != null)
+                if (_currentBook != null && !_isPlaylistMode) // Inherit position over playlist transition
                 {
                     _currentBook.LastPlayedPosition = _audioEngine.GetTime();
                     _dbService.AddOrUpdateBook(_currentBook);
@@ -87,20 +129,39 @@ namespace AudiobookPlayer
                 await System.Threading.Tasks.Task.Delay(300);
 
                 // Fetch chapters after Media is parsed
-                _chapters = _audioEngine.GetChapters();
-                ChapterComboBox.ItemsSource = _chapters;
-                
-                if (_chapters.Count > 0)
+                if (!_isPlaylistMode)
                 {
-                    // Fallback visually until the ChapterChanged event fires legitimately
-                    _currentChapter = _chapters[0];
-                    CurrentChapterText.Text = _currentChapter.Name;
-                    UpdateChapterProgressBounds();
+                    _chapters = _audioEngine.GetChapters();
+                    ChapterComboBox.ItemsSource = _chapters;
+                    
+                    if (_chapters.Count > 0)
+                    {
+                        _currentChapter = _chapters.FirstOrDefault(c => c.Index == _audioEngine.MediaPlayer.Chapter) ?? _chapters[0];
+                        CurrentChapterText.Text = _currentChapter.Name;
+                        UpdateChapterProgressBounds();
+                    }
+                    else
+                    {
+                        CurrentChapterText.Text = "No Chapters Available";
+                        _currentChapter = null;
+                        ProgressSlider.Maximum = Math.Max(1, _currentBook.TotalDuration);
+                        TotalTimeText.Text = FormatTimeMs(_currentBook.TotalDuration);
+                    }
                 }
                 else
                 {
-                    CurrentChapterText.Text = "No Chapters Available";
-                    _currentChapter = null;
+                    // MULTI-FILE PLAYLIST MODE
+                    _chapters = new List<ChapterInfo>();
+                    for (int i = 0; i < _playlist.Count; i++)
+                    {
+                        _chapters.Add(new ChapterInfo { Index = i, Name = System.IO.Path.GetFileNameWithoutExtension(_playlist[i]), StartTimeOffset = 0 });
+                    }
+                    ChapterComboBox.ItemsSource = _chapters;
+                    
+                    _currentChapter = _chapters[_playlistIndex];
+                    CurrentChapterText.Text = _currentChapter.Name;
+                    ChapterComboBox.SelectedIndex = _playlistIndex;
+                    
                     ProgressSlider.Maximum = Math.Max(1, _currentBook.TotalDuration);
                     TotalTimeText.Text = FormatTimeMs(_currentBook.TotalDuration);
                 }
@@ -161,12 +222,32 @@ namespace AudiobookPlayer
 
         private void SkipBackBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentBook != null) _audioEngine.SkipBackward(15000);
+            if (_currentBook != null) _audioEngine.SkipBackward(_appConfig.SkipDuration * 1000);
         }
 
         private void SkipForwardBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentBook != null) _audioEngine.SkipForward(15000);
+            if (_currentBook != null) _audioEngine.SkipForward(_appConfig.SkipDuration * 1000);
+        }
+
+        private void SettingsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var settingsWindow = new SettingsWindow();
+                settingsWindow.Owner = this;
+                if (settingsWindow.ShowDialog() == true)
+                {
+                    // Reload config after save
+                    _appConfig = AppConfig.Load();
+                    UpdateSkipButtonLabels();
+                }
+            }
+            catch (Exception ex)
+            {
+                // This will pop up an error box instead of crashing the app!
+                System.Windows.MessageBox.Show($"Crash Reason: {ex.Message}\n\n{ex.InnerException?.Message}", "App Crashed!");
+            }
         }
 
         private void ApplyCurrentPlaybackSpeed()
@@ -193,9 +274,19 @@ namespace AudiobookPlayer
         {
             if (ChapterComboBox.SelectedItem is ChapterInfo selectedChapter)
             {
-                if (_audioEngine.MediaPlayer.Chapter != selectedChapter.Index)
+                if (_isPlaylistMode)
                 {
-                    _audioEngine.SetChapter(selectedChapter.Index);
+                    if (_playlistIndex != selectedChapter.Index)
+                    {
+                        LoadPlaylist(_playlist, selectedChapter.Index);
+                    }
+                }
+                else
+                {
+                    if (_audioEngine.MediaPlayer.Chapter != selectedChapter.Index)
+                    {
+                        _audioEngine.SetChapter(selectedChapter.Index);
+                    }
                 }
             }
         }
@@ -312,7 +403,7 @@ namespace AudiobookPlayer
             {
                 if (_currentBook != null)
                 {
-                    if (_currentChapter != null)
+                    if (_currentChapter != null && !_isPlaylistMode)
                     {
                         // Custom Chapter-Relative Progress Calculations
                         long chapterDuration = GetChapterDuration(_currentChapter);
@@ -351,15 +442,22 @@ namespace AudiobookPlayer
         {
             Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                _isPlaying = false;
-                UpdatePlayPauseButton();
-                ProgressSlider.Value = 0;
-                CurrentTimeText.Text = FormatTimeMs(0);
-                
-                if (_currentBook != null)
+                if (_currentBook != null && _appConfig.SavePosition)
                 {
                     _currentBook.LastPlayedPosition = 0;
                     _dbService.AddOrUpdateBook(_currentBook);
+                }
+
+                if (_isPlaylistMode && _playlistIndex < _playlist.Count - 1)
+                {
+                    LoadPlaylist(_playlist, _playlistIndex + 1);
+                }
+                else
+                {
+                    _isPlaying = false;
+                    UpdatePlayPauseButton();
+                    ProgressSlider.Value = 0;
+                    CurrentTimeText.Text = FormatTimeMs(0);
                 }
             });
         }
@@ -377,7 +475,7 @@ namespace AudiobookPlayer
                 long targetTime = (long)ProgressSlider.Value;
                 
                 // Seeking targets the global time, so add the chapter offset!
-                if (_currentChapter != null)
+                if (_currentChapter != null && !_isPlaylistMode)
                 {
                     targetTime += _currentChapter.StartTimeOffset;
                 }
@@ -397,7 +495,7 @@ namespace AudiobookPlayer
 
         protected override void OnClosed(EventArgs e)
         {
-            if (_currentBook != null)
+            if (_currentBook != null && _appConfig.SavePosition)
             {
                 _currentBook.LastPlayedPosition = _audioEngine.GetTime();
                 _dbService.AddOrUpdateBook(_currentBook);
