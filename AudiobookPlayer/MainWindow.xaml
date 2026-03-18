@@ -1,15 +1,15 @@
 <Window x:Class="AudiobookPlayer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Audiobook Player" Height="580" Width="880" 
-        Background="#121212" Foreground="White" WindowStartupLocation="CenterScreen" 
+        Title="Audiobook Player" Height="680" Width="980" 
+        Background="{DynamicResource WindowBackgroundBrush}" Foreground="{DynamicResource WindowTextBrush}" WindowStartupLocation="CenterScreen" 
         FontFamily="Segoe UI, Tahoma, sans-serif">
     
     <Window.Resources>
         <!-- Modern Button Style (Green Primary Action) -->
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1DB954"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryAccentBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryButtonTextBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -22,10 +22,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#1ED760"/>
+                                <Setter Property="Background" Value="{DynamicResource PrimaryAccentHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#1AA34A"/>
+                                <Setter Property="Background" Value="{DynamicResource PrimaryAccentPressedBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -35,8 +35,8 @@
 
         <!-- Secondary Button Style (Dark Gray) -->
         <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-            <Setter Property="Background" Value="#282828"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryButtonTextBrush}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Template">
@@ -47,10 +47,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#3E3E3E"/>
+                                <Setter Property="Background" Value="{DynamicResource SecondaryButtonHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#181818"/>
+                                <Setter Property="Background" Value="{DynamicResource PanelPressedBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -60,7 +60,7 @@
 
         <!-- Accent Colored Slider -->
         <Style TargetType="Slider">
-            <Setter Property="Foreground" Value="#1DB954"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryAccentBrush}"/>
             <Setter Property="Margin" Value="5,0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
@@ -81,7 +81,7 @@
                 <Grid.Effect>
                     <DropShadowEffect Color="Black" BlurRadius="30" ShadowDepth="12" Opacity="0.5"/>
                 </Grid.Effect>
-                <Rectangle RadiusX="12" RadiusY="12" Fill="#1E1E1E" Width="280" Height="280"/>
+                <Rectangle RadiusX="12" RadiusY="12" Fill="{DynamicResource PanelBackgroundBrush}" Width="280" Height="280"/>
                 <Image x:Name="CoverImage" Stretch="Uniform" Width="280" Height="280">
                     <Image.OpacityMask>
                         <VisualBrush>
@@ -112,7 +112,7 @@
                         ValueChanged="VolumeSlider_ValueChanged" IsSnapToTickEnabled="True" TickFrequency="1">
                     <Slider.Style>
                         <Style TargetType="Slider">
-                            <Setter Property="Foreground" Value="#1DB954"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryAccentBrush}"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Setter Property="Opacity" Value="0"/>
                             <Setter Property="Width" Value="0"/>
@@ -148,12 +148,12 @@
             </Grid.RowDefinitions>
 
             <!-- Metadata Header -->
-            <TextBlock x:Name="TitleText" Grid.Row="0" Text="No Book Loaded" FontSize="36" FontWeight="Black" TextWrapping="Wrap" Margin="0,0,0,8" Foreground="White" />
-            <TextBlock x:Name="AuthorText" Grid.Row="1" Text="Unknown Author" FontSize="20" Foreground="#B3B3B3" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock x:Name="TitleText" Grid.Row="0" Text="No Book Loaded" FontSize="30" FontWeight="Black" TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{DynamicResource WindowTextBrush}" />
+            <TextBlock x:Name="AuthorText" Grid.Row="1" Text="Unknown Author" FontSize="20" Foreground="{DynamicResource MutedTextBrush}" FontWeight="SemiBold" Margin="0,0,0,8" />
             
             <!-- Chapter Indicator Badge -->
-            <Border Grid.Row="2" Background="#1DB954" CornerRadius="6" HorizontalAlignment="Left" Padding="12,4" Opacity="0.9">
-                <TextBlock x:Name="CurrentChapterText" Text="Waiting for chapter data..." FontSize="13" Foreground="#FFFFFF" FontWeight="Bold" />
+            <Border Grid.Row="2" Background="{DynamicResource PrimaryAccentBrush}" CornerRadius="6" HorizontalAlignment="Left" Padding="12,4" Opacity="0.9">
+                <TextBlock x:Name="CurrentChapterText" Text="Waiting for chapter data..." FontSize="13" Foreground="{DynamicResource PrimaryButtonTextBrush}" FontWeight="Bold" />
             </Border>
 
             <!-- Progress Bar / Slider Area -->
@@ -163,10 +163,10 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock x:Name="CurrentTimeText" Grid.Column="0" Text="0:00:00" VerticalAlignment="Center" Margin="0,0,15,0" Foreground="#B3B3B3" FontSize="13" FontWeight="SemiBold" MinWidth="55" TextAlignment="Right"/>
+                <TextBlock x:Name="CurrentTimeText" Grid.Column="0" Text="0:00:00" VerticalAlignment="Center" Margin="0,0,15,0" Foreground="{DynamicResource MutedTextBrush}" FontSize="13" FontWeight="SemiBold" MinWidth="55" TextAlignment="Right"/>
                 <Slider x:Name="ProgressSlider" Grid.Column="1" VerticalAlignment="Center" IsMoveToPointEnabled="True" 
                         PreviewMouseDown="ProgressSlider_PreviewMouseDown" PreviewMouseUp="ProgressSlider_PreviewMouseUp" />
-                <TextBlock x:Name="TotalTimeText" Grid.Column="2" Text="0:00:00" VerticalAlignment="Center" Margin="15,0,0,0" Foreground="#B3B3B3" FontSize="13" FontWeight="SemiBold" MinWidth="55"/>
+                <TextBlock x:Name="TotalTimeText" Grid.Column="2" Text="0:00:00" VerticalAlignment="Center" Margin="15,0,0,0" Foreground="{DynamicResource MutedTextBrush}" FontSize="13" FontWeight="SemiBold" MinWidth="55"/>
             </Grid>
 
             <!-- Core Playback Controls -->

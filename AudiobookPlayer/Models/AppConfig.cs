@@ -12,6 +12,7 @@ namespace AudiobookPlayer.Models
         public string LibraryPath { get; set; } = string.Empty;
         public int SkipDuration { get; set; } = 15;
         public bool SavePosition { get; set; } = true;
+        public string Theme { get; set; } = "DarkGreen";
 
         private static readonly string ConfigDir =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AudiobookPlayer");

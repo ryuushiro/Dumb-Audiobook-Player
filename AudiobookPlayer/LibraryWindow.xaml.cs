@@ -12,11 +12,12 @@ namespace AudiobookPlayer
     /// <summary>
     /// Represents a single audiobook (a folder containing audio files).
     /// </summary>
-    public class AudiobookFileInfo
+    public class BookItem
     {
         public string Title { get; set; } = string.Empty;
         public string Subtitle { get; set; } = string.Empty;
         public string FullPath { get; set; } = string.Empty;
+        public System.Windows.Media.ImageSource? CoverArt { get; set; }
     }
 
     public partial class LibraryWindow : Window
@@ -51,6 +52,8 @@ namespace AudiobookPlayer
 
             LibraryPathLabel.Text = config.LibraryPath;
 
+            var metadataService = new AudiobookPlayer.Services.MetadataService();
+
             // Each subfolder = one audiobook
             var bookFolders = Directory.GetDirectories(config.LibraryPath)
                 .Select(folderPath =>
@@ -59,11 +62,24 @@ namespace AudiobookPlayer
                         .Where(f => SupportedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
                         .ToList();
 
-                    return new AudiobookFileInfo
+                    System.Windows.Media.ImageSource? cover = null;
+                    if (audioFiles.Count > 0)
+                    {
+                        var firstFile = audioFiles.FirstOrDefault(f => Path.GetExtension(f).ToLowerInvariant() == ".m4b") ?? audioFiles[0];
+                        try 
+                        {
+                            var bookInfo = metadataService.ExtractMetadata(firstFile);
+                            cover = bookInfo.CoverImage;
+                        } 
+                        catch { } // Ignore tag read errors, fallback to null cover
+                    }
+
+                    return new BookItem
                     {
                         Title = Path.GetFileName(folderPath),
                         Subtitle = $"{audioFiles.Count} audio file{(audioFiles.Count != 1 ? "s" : "")}",
-                        FullPath = folderPath
+                        FullPath = folderPath,
+                        CoverArt = cover
                     };
                 })
                 .Where(b => b.Subtitle != "0 audio files") // Only show folders that actually contain audio
@@ -76,7 +92,7 @@ namespace AudiobookPlayer
 
         private void BooksListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (BooksListBox.SelectedItem is AudiobookFileInfo selected)
+            if (BooksListBox.SelectedItem is BookItem selected)
             {
                 // Find the best file to load from this book folder:
                 // Prefer a single .m4b file, otherwise pick the first audio file alphabetically

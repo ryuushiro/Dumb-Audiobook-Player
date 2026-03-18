@@ -138,12 +138,14 @@ namespace AudiobookPlayer
                     {
                         _currentChapter = _chapters.FirstOrDefault(c => c.Index == _audioEngine.MediaPlayer.Chapter) ?? _chapters[0];
                         CurrentChapterText.Text = _currentChapter.Name;
+                        ChapterComboBox.SelectedItem = _currentChapter;
                         UpdateChapterProgressBounds();
                     }
                     else
                     {
                         CurrentChapterText.Text = "No Chapters Available";
                         _currentChapter = null;
+                        ChapterComboBox.SelectedItem = null;
                         ProgressSlider.Maximum = Math.Max(1, _currentBook.TotalDuration);
                         TotalTimeText.Text = FormatTimeMs(_currentBook.TotalDuration);
                     }

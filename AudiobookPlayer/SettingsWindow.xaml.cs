@@ -38,6 +38,16 @@ namespace AudiobookPlayer
 
             // Save Position
             SavePositionCheckBox.IsChecked = _config.SavePosition;
+
+            // Theme
+            foreach (ComboBoxItem item in ThemeComboBox.Items)
+            {
+                if (item.Tag?.ToString() == _config.Theme)
+                {
+                    ThemeComboBox.SelectedItem = item;
+                    break;
+                }
+            }
         }
 
         private void BrowseBtn_Click(object sender, RoutedEventArgs e)
@@ -73,7 +83,17 @@ namespace AudiobookPlayer
             // Save Position
             _config.SavePosition = SavePositionCheckBox.IsChecked ?? true;
 
+            // Theme
+            if (ThemeComboBox.SelectedItem is ComboBoxItem selectedTheme)
+            {
+                _config.Theme = selectedTheme.Tag?.ToString() ?? "DarkGreen";
+            }
+
             _config.Save();
+            
+            // Instantly apply theme!
+            App.ApplyTheme(_config.Theme);
+            
             DialogResult = true;
             Close();
         }
