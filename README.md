@@ -66,4 +66,4 @@ The output will be found in `bin/Release/net8.0-windows/win-x64/publish/`.
 - **`MainWindow.xaml.cs`**: UI logic and event wiring.
 
 ---
-Built with ❤️ by [Your Name/Github]
+Built with ❤️ by dumbasses.
